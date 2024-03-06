@@ -174,6 +174,17 @@ module DearImGui
   , vSliderInt
   , vSliderScalar
 
+    -- ** Scalar Input
+  , inputFloat
+  , inputFloat2
+  , inputFloat3
+  , inputFloat4
+  , inputInt
+  , inputInt2
+  , inputInt3
+  , inputInt4
+  , inputDouble
+
     -- ** Text Input
   , inputText
   , inputTextMultiline
@@ -1242,6 +1253,149 @@ vSliderScalar label size dataType ref refMin refMax format flags = liftIO do
 
           return changed
 
+
+-- | Wraps @ImGui::InputFloat()@.
+inputFloat :: (MonadIO m, HasSetter ref Float, HasGetter ref Float) => Text -> ref -> Float -> Float -> m Bool
+inputFloat label ref step stepFast = liftIO do
+  currentValue <- get ref
+  
+  with (CFloat currentValue) \dataPtr ->
+    Text.withCString label \labelPtr -> do
+      changed <- Raw.inputFloat labelPtr dataPtr (CFloat step) (CFloat stepFast) nullPtr ImGuiInputTextFlags_None
+
+      when changed do
+        CFloat newValue <- peek dataPtr
+        ref $=! newValue
+      
+      return changed
+
+-- | Wraps @ImGui::InputFloat2()@.
+inputFloat2 :: (MonadIO m, HasSetter ref (Float, Float), HasGetter ref (Float, Float)) => Text -> ref -> m Bool
+inputFloat2 label ref = liftIO do
+  (x, y) <- get ref
+
+  withArray [CFloat x, CFloat y] \dataPtr ->
+    Text.withCString label \labelPtr -> do
+      changed <- Raw.inputFloat2 labelPtr dataPtr nullPtr ImGuiInputTextFlags_None
+
+      when changed do
+        [CFloat x', CFloat y'] <- peekArray 2 dataPtr
+        ref $=! (x', y')
+
+      return changed
+
+-- | Wraps @ImGui::InputFloat3()@.
+inputFloat3
+  :: (MonadIO m, HasSetter ref (Float, Float, Float), HasGetter ref (Float, Float, Float))
+  => Text -> ref -> m Bool
+inputFloat3 label ref = liftIO do
+  (x, y, z) <- get ref
+
+  withArray [CFloat x, CFloat y, CFloat z] \dataPtr ->
+    Text.withCString label \labelPtr -> do
+      changed <- Raw.inputFloat3 labelPtr dataPtr nullPtr ImGuiInputTextFlags_None
+
+      when changed do
+        [CFloat x', CFloat y', CFloat z'] <- peekArray 3 dataPtr
+        ref $=! (x', y', z')
+      
+      return changed
+
+
+-- | Wraps @ImGui::InputFloat4()@.
+inputFloat4
+  :: (MonadIO m, HasSetter ref (Float, Float, Float, Float), HasGetter ref (Float, Float, Float, Float))
+  => Text -> ref -> m Bool
+inputFloat4 label ref = liftIO do
+  (x, y, z, w) <- get ref
+
+  withArray [CFloat x, CFloat y, CFloat z, CFloat w] \dataPtr ->
+    Text.withCString label \labelPtr -> do
+      changed <- Raw.inputFloat4 labelPtr dataPtr nullPtr ImGuiInputTextFlags_None
+
+      when changed do
+        [CFloat x', CFloat y', CFloat z', CFloat w'] <- peekArray 4 dataPtr
+        ref $=! (x', y', z', w')
+      
+      return changed
+
+-- | Wraps @ImGui::InputInt()@.
+inputInt :: (MonadIO m, HasSetter ref Int, HasGetter ref Int) => Text -> ref -> CInt -> CInt  -> m Bool
+inputInt label ref step stepFast = liftIO do
+  currentValue <- get ref
+  
+  with (fromIntegral currentValue) \dataPtr ->
+    Text.withCString label \labelPtr -> do
+      changed <- Raw.inputInt labelPtr dataPtr (fromIntegral step) (fromIntegral stepFast) ImGuiInputTextFlags_None
+
+      when changed do
+        newValue <- peek dataPtr
+        ref $=! fromIntegral newValue
+      
+      return changed
+
+-- | Wraps @ImGui::InputInt2()@.
+inputInt2 :: (MonadIO m, HasSetter ref (Int, Int), HasGetter ref (Int, Int)) => Text -> ref  -> m Bool
+inputInt2 label ref = liftIO do
+  (x, y) <- get ref
+  
+  withArray [fromIntegral x, fromIntegral y] \dataPtr ->
+    Text.withCString label \labelPtr -> do
+      changed <- Raw.inputInt2 labelPtr dataPtr ImGuiInputTextFlags_None
+
+      when changed do
+        [x', y'] <- peekArray 2 dataPtr
+        ref $=! (fromIntegral x', fromIntegral y')
+      
+      return changed
+
+-- | Wraps @ImGui::InputInt3()@.
+inputInt3 :: (MonadIO m, HasSetter ref (Int, Int, Int), HasGetter ref (Int, Int, Int)) => Text -> ref  -> m Bool
+inputInt3 label ref = liftIO do
+  (x, y, z) <- get ref
+  
+  withArray [fromIntegral x, fromIntegral y, fromIntegral z] \dataPtr ->
+    Text.withCString label \labelPtr -> do
+      changed <- Raw.inputInt3 labelPtr dataPtr ImGuiInputTextFlags_None
+
+      when changed do
+        [x', y', z'] <- peekArray 3 dataPtr
+        ref $=! (fromIntegral x', fromIntegral y', fromIntegral z')
+      
+      return changed
+
+-- | Wraps @ImGui::InputInt4()@.
+inputInt4
+  :: (MonadIO m, HasSetter ref (Int, Int, Int, Int), HasGetter ref (Int, Int, Int, Int))
+  => Text -> ref -> m Bool
+inputInt4 label ref = liftIO do
+  (x, y, z, w) <- get ref
+  
+  withArray [fromIntegral x, fromIntegral y, fromIntegral z, fromIntegral w] \dataPtr ->
+    Text.withCString label \labelPtr -> do
+      changed <- Raw.inputInt4 labelPtr dataPtr ImGuiInputTextFlags_None
+
+      when changed do
+        [x', y', z', w'] <- peekArray 4 dataPtr
+        ref $=! (fromIntegral x', fromIntegral y', fromIntegral z', fromIntegral w')
+      
+      return changed
+
+-- | Wraps @ImGui::InputDouble()@.
+inputDouble :: (MonadIO m, HasSetter ref Double, HasGetter ref Double) => Text -> ref -> Double -> Double -> Text -> m Bool
+inputDouble label ref step stepFast format = liftIO do
+  currentValue <- get ref
+
+  with (CDouble currentValue) \dataPtr ->
+    Text.withCString label \labelPtr ->
+      Text.withCString format \formatPtr -> do
+        changed <- Raw.inputDouble labelPtr dataPtr (CDouble step) (CDouble stepFast) formatPtr ImGuiInputTextFlags_None
+        
+        when changed do
+          CDouble newValue <- peek dataPtr
+          ref $=! newValue
+
+        return changed
 
 -- | Wraps @ImGui::InputText()@.
 inputText :: (MonadIO m, HasSetter ref Text, HasGetter ref Text) => Text -> ref -> Int -> m Bool

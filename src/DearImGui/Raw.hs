@@ -152,6 +152,17 @@ module DearImGui.Raw
   , vSliderInt
   , vSliderScalar
 
+    -- ** Scalar Input
+  , inputFloat
+  , inputFloat2
+  , inputFloat3
+  , inputFloat4
+  , inputInt
+  , inputInt2
+  , inputInt3
+  , inputInt4
+  , inputDouble
+
     -- ** Text Input
   , inputText
   , inputTextMultiline
@@ -1038,6 +1049,133 @@ vSliderScalar labelPtr sizePtr dataType dataPtr minPtr maxPtr formatPtr flags = 
     minPtr_ = castPtr minPtr
     maxPtr_ = castPtr maxPtr
 
+-- | Wraps @ImGui::InputFloat()@.
+inputFloat :: (MonadIO m) => CString -> Ptr CFloat -> CFloat -> CFloat -> CString -> ImGuiInputTextFlags -> m Bool
+inputFloat labelPtr vPtr step stepFast formatPtr flags = liftIO do
+  (0 /=) <$> [C.exp|
+    bool {
+      InputFloat(
+        $(char* labelPtr),
+        $(float* vPtr),
+        $(float step),
+        $(float stepFast),
+        $(const char* formatPtr),
+        $(ImGuiInputTextFlags flags)
+      )
+    }
+  |]
+
+-- | Wraps @ImGui::InputFloat2()@.
+inputFloat2 :: (MonadIO m) => CString -> Ptr CFloat -> CString -> ImGuiInputTextFlags -> m Bool
+inputFloat2 labelPtr vPtr formatPtr flags = liftIO do
+  (0 /=) <$> [C.exp|
+    bool {
+      InputFloat2(
+        $(char* labelPtr),
+        $(float vPtr[2]),
+        $(const char* formatPtr),
+        $(ImGuiInputTextFlags flags)
+      )
+    }
+  |]
+
+-- | Wraps @ImGui::InputFloat3()@.
+inputFloat3 :: (MonadIO m) => CString -> Ptr CFloat -> CString -> ImGuiInputTextFlags -> m Bool
+inputFloat3 labelPtr vPtr formatPtr flags = liftIO do
+  (0 /=) <$> [C.exp|
+    bool {
+      InputFloat3(
+        $(char* labelPtr),
+        $(float vPtr[3]),
+        $(const char* formatPtr),
+        $(ImGuiInputTextFlags flags)
+      )
+    }
+  |]
+
+-- | Wraps @ImGui::InputFloat4()@.
+inputFloat4 :: (MonadIO m) => CString -> Ptr CFloat -> CString -> ImGuiInputTextFlags -> m Bool
+inputFloat4 labelPtr vPtr formatPtr flags = liftIO do
+  (0 /=) <$> [C.exp|
+    bool {
+      InputFloat4(
+        $(char* labelPtr),
+        $(float vPtr[4]),
+        $(const char* formatPtr),
+        $(ImGuiInputTextFlags flags)
+      )
+    }
+  |]
+
+-- | Wraps @ImGui::InputInt()@.
+inputInt :: (MonadIO m) => CString -> Ptr CInt -> CInt -> CInt -> ImGuiInputTextFlags -> m Bool
+inputInt labelPtr vPtr step stepFast flags = liftIO do
+  (0 /=) <$> [C.exp|
+    bool {
+      InputInt(
+        $(char* labelPtr),
+        $(int* vPtr),
+        $(int step),
+        $(int stepFast),
+        $(ImGuiInputTextFlags flags)
+      )
+    }
+  |]
+
+-- | Wraps @ImGui::InputInt2()@.
+inputInt2 :: (MonadIO m) => CString -> Ptr CInt -> ImGuiInputTextFlags -> m Bool
+inputInt2 labelPtr vPtr flags = liftIO do
+  (0 /=) <$> [C.exp|
+    bool {
+      InputInt2(
+        $(char* labelPtr),
+        $(int vPtr[2]),
+        $(ImGuiInputTextFlags flags)
+      )
+    }
+  |]
+
+-- | Wraps @ImGui::InputInt3()@.
+inputInt3 :: (MonadIO m) => CString -> Ptr CInt -> ImGuiInputTextFlags -> m Bool
+inputInt3 labelPtr vPtr flags = liftIO do
+  (0 /=) <$> [C.exp|
+    bool {
+      InputInt3(
+        $(char* labelPtr),
+        $(int vPtr[3]),
+        $(ImGuiInputTextFlags flags)
+      )
+    }
+  |]
+
+-- | Wraps @ImGui::InputInt4()@.
+inputInt4 :: (MonadIO m) => CString -> Ptr CInt -> ImGuiInputTextFlags -> m Bool
+inputInt4 labelPtr vPtr flags = liftIO do
+  (0 /=) <$> [C.exp|
+    bool {
+      InputInt4(
+        $(char* labelPtr),
+        $(int vPtr[4]),
+        $(ImGuiInputTextFlags flags)
+      )
+    }
+  |]
+
+-- | Wraps @ImGui::InputDouble()@.
+inputDouble :: (MonadIO m) => CString -> Ptr CDouble -> CDouble -> CDouble -> CString -> ImGuiInputTextFlags -> m Bool
+inputDouble labelPtr vPtr step stepFast formatPtr flags = liftIO do
+  (0 /=) <$> [C.exp|
+    bool {
+      InputDouble(
+        $(char* labelPtr),
+        $(double* vPtr),
+        $(double step),
+        $(double stepFast),
+        $(const char* formatPtr),
+        $(ImGuiInputTextFlags flags)
+      )
+    }
+  |]
 
 -- | Wraps @ImGui::InputText()@.
 inputText :: (MonadIO m) => CString -> CStringLen -> ImGuiInputTextFlags -> m Bool
@@ -1082,7 +1220,6 @@ inputTextWithHint labelPtr hintPtr (bufPtr, fromIntegral -> bufSize) flags = lif
       )
     }
   |]
-
 
 -- | Wraps @ImGui::ColorPicker3()@.
 colorPicker3 :: (MonadIO m) => CString -> Ptr CFloat -> m Bool
